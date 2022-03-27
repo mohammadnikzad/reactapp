@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import logo from './logo.svg'
 import './App.css'
 import Card from './components/Card'
+import MyAlert from './components/Alert'
+import { Carousel } from 'react-bootstrap'
+import ErrorBoundary from './components/errors/ErrorBoundary'
 
 function App1() {
   const [stateArticle, setArticleState] = useState({
@@ -44,6 +47,33 @@ function App1() {
 }
 
 class App extends React.Component {
+  constructor(props) {
+    super(props)
+    console.log('[App.js] run constructor')
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    console.log('[App.js] run getDerivedStateFromProps')
+    return null
+  }
+
+  shouldComponentUpdate(props, state) {
+    console.log(props, state)
+    console.log('[App.js] run shouldComponentUpdate')
+    return true
+  }
+
+  componentDidMount() {
+    setTimeout(() => {
+      this.setState((state, props) => ({
+        articles: [
+          ...state.articles,
+          { id: 4, title: 'Article 4', body: 'This is article 4', active: 1 },
+        ],
+      }))
+    }, 3000)
+  }
+
   state = {
     articles: [
       { id: 1, title: 'Article 1', body: 'This is article 1', active: 1 },
@@ -53,6 +83,9 @@ class App extends React.Component {
     title: 'This is Matnnama',
     loading: false,
     btnHover: false,
+    alert: {
+      show: true,
+    },
   }
 
   loadMore = () => {
@@ -85,19 +118,80 @@ class App extends React.Component {
     })
   }
 
+  setShow(status) {
+    this.setState((prevState) => {
+      return {
+        alert: {
+          show: status,
+        },
+      }
+    })
+  }
+
   render() {
+    console.log('[App.js] run render')
+
     let articleList = this.state.articles.map((article, index) =>
       article.active ? (
         <Card key={index} title={article.title} body={article.body} />
       ) : null
     )
 
+    let btnClasses = ['btn-more']
+
+    if (this.state.btnHover) {
+      btnClasses.push('active')
+    }
+
+    let { alert } = this.state
     return (
       <div className='App'>
-        {articleList}
+        <MyAlert show={alert.show} setShow={this.setShow.bind(this)} />
+        <Carousel>
+          <Carousel.Item>
+            <img
+              className='d-block w-100'
+              src='https://static.roocket.ir/images/cover/2022/3/16/tsyLuvfe5O1SoOLObu78bhLTMu84rvyA8PqpIryS.jpg'
+              alt='First slide'
+            />
+            <Carousel.Caption>
+              <h3>First slide label</h3>
+              <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
+            </Carousel.Caption>
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className='d-block w-100'
+              src='https://static.roocket.ir/images/cover/2022/2/6/3PlQ3mofymYiMeBCoEhFioIYRAlLA8oZxjwrNDrX.png'
+              alt='Second slide'
+            />
+
+            <Carousel.Caption>
+              <h3>Second slide label</h3>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            </Carousel.Caption>
+          </Carousel.Item>
+          <Carousel.Item>
+            <img
+              className='d-block w-100'
+              src='https://static.roocket.ir/images/cover/2022/2/6/eAJubdTlHdkyNIMjWauJpw8lE3YhWwuixXdTbBHW.png'
+              alt='Third slide'
+            />
+
+            <Carousel.Caption>
+              <h3>Third slide label</h3>
+              <p>
+                Praesent commodo cursus magna, vel scelerisque nisl consectetur.
+              </p>
+            </Carousel.Caption>
+          </Carousel.Item>
+        </Carousel>
+
+        <ErrorBoundary>{articleList}</ErrorBoundary>
         {this.state.loading ? <div>Loading...</div> : null}
         <button
-          className='btn-more'
+          // className={`btn-more ${this.state.btnHover ? 'active' : ''}`}
+          className={btnClasses.join(' ')}
           onClick={this.loadMore}
           onMouseEnter={this.mouseEnter}
           onMouseLeave={this.mouseLeave}
